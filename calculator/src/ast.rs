@@ -34,7 +34,7 @@ impl fmt::Display for Node {
         match &self {
             Node::Int(n) => write!(f, "{}", n),
             Node::UnaryExpr { op, child } => write!(f, "{}{}", op, *child),
-            Node::BinaryExpr { op, lhs, rhs } => write!(f, "{} {} {}", op, *lhs, *rhs),
+            Node::BinaryExpr { op, lhs, rhs } => write!(f, "Operator: {}\nLHS: {}\n RHS {}", op, *lhs, *rhs),
         }
     }
 }

@@ -73,6 +73,8 @@ mod tests {
             Interpreter::from_source("-57 + (-7 + 10) - 80 + 100").unwrap() as i32,
             -34
         );
+
+        assert_eq!(Interpreter::from_source("1 + 2 - 3").unwrap() as i32, 0);
     }
 
     #[test]

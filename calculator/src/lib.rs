@@ -16,7 +16,9 @@ pub trait Compile {
 
         let ast: Vec<Node> = parser::parse(source).unwrap();
 
-        println!("{:?}", ast);
+        for node in ast.iter() {
+            println!("Node => {:?}", node);
+        }
 
         Self::from_ast(ast)
     }
