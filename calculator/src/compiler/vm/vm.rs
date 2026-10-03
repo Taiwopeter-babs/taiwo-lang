@@ -1,8 +1,13 @@
 use std::mem::MaybeUninit;
 
+use anyhow::anyhow;
+
 use crate::{
-    Node,
-    compiler::vm::{bytecode::Bytecode, opcode::convert_two_u8s_to_usize},
+    Compile, Node, Result,
+    compiler::vm::{
+        bytecode::{Bytecode, Interpreter as BytecodeInterpreter},
+        opcode::convert_two_u8s_to_usize,
+    },
 };
 
 const STACK_SIZE: usize = 512;
@@ -90,6 +95,11 @@ impl VM {
     }
 
     pub fn pop(&mut self) -> Node {
+        let current_stack_ptr = self.stack_ptr;
+
+        if current_stack_ptr == 0 {
+            println!("Yes it is {}", current_stack_ptr);
+        }
         let node = unsafe { self.stack[self.stack_ptr - 1].assume_init_read() };
 
         self.stack_ptr -= 1;
@@ -103,5 +113,52 @@ impl VM {
         let node = unsafe { self.stack[self.stack_ptr].assume_init_ref() };
 
         node
+    }
+}
+
+impl Compile for VM {
+    type Output = Result<i32>;
+
+    fn from_ast(ast: Vec<Node>) -> Self::Output {
+        let bytecode = BytecodeInterpreter::from_ast(ast);
+        let mut vm = VM::new(bytecode);
+
+        vm.run();
+
+        let result_int = vm.pop_last();
+
+        match result_int {
+            Node::Int(n) => Ok(*n),
+            _ => Err(anyhow!("Expected Integer Result")),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::{Compile, Node, compiler::vm::bytecode::Interpreter as BytecodeInterpreter};
+
+    fn assert_pop_last(source: &str, node: Node) {
+        let byte_code = BytecodeInterpreter::from_source(source);
+        println!("byte code: {:?}", byte_code);
+
+        let mut vm = VM::new(byte_code);
+        vm.run();
+
+        assert_eq!(&node, vm.pop_last());
+    }
+
+    #[test]
+    fn unary() {
+        assert_pop_last("+3", Node::Int(3));
+        assert_pop_last("-6", Node::Int(-6));
+    }
+
+    #[test]
+    fn binary() {
+        assert_pop_last("10 + 33;", Node::Int(43));
+        assert_pop_last("1 - 98;", Node::Int(-97));
     }
 }

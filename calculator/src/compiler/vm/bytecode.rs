@@ -76,8 +76,8 @@ impl Interpreter {
                 self.interprete_node(*child);
 
                 match op {
-                    Operator::Plus => self.add_instruction(OpCode::OpAdd),
-                    Operator::Minus => self.add_instruction(OpCode::OpSub),
+                    Operator::Plus => self.add_instruction(OpCode::OpPlus),
+                    Operator::Minus => self.add_instruction(OpCode::OpMinus),
                 };
             }
             Node::BinaryExpr { op, lhs, rhs } => {
