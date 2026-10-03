@@ -1,4 +1,5 @@
 use crate::{Compile, Node, Result, ast::Operator};
+#[cfg(feature = "jit")]
 use inkwell::{
     OptimizationLevel, builder::Builder, context::Context, execution_engine::JitFunction,
     types::IntType, values::IntValue,
@@ -10,6 +11,7 @@ type JitFunc = unsafe extern "C" fn() -> i32;
 
 pub struct Jit;
 
+#[cfg(feature = "jit")]
 impl Compile for Jit {
     type Output = Result<i32>;
 
@@ -46,11 +48,13 @@ impl Compile for Jit {
     }
 }
 
+#[cfg(feature = "jit")]
 struct RecursiveBuilder<'a> {
     i32_type: IntType<'a>,
     builder: &'a Builder<'a>,
 }
 
+#[cfg(feature = "jit")]
 impl<'a> RecursiveBuilder<'a> {
     pub fn new(i32_type: IntType<'a>, builder: &'a Builder<'a>) -> Self {
         Self { i32_type, builder }
@@ -86,6 +90,7 @@ impl<'a> RecursiveBuilder<'a> {
     }
 }
 
+#[cfg(feature = "jit")]
 #[cfg(test)]
 mod tests {
     use super::*;
